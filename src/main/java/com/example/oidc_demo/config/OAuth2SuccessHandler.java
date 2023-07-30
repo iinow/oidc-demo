@@ -1,5 +1,8 @@
 package com.example.oidc_demo.config;
 
+import com.example.oidc_demo.common.CookieUtils;
+import com.example.oidc_demo.config.security.JwtFilter;
+import com.example.oidc_demo.config.security.JwtProvider;
 import com.example.oidc_demo.entity.Member;
 import com.example.oidc_demo.member.MemberService;
 import jakarta.servlet.ServletException;
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final MemberService memberService;
+    private final JwtProvider jwtProvider;
 
     /**
      * TODO OIDC 연동시 Authentication.principal 값은 DefaultOidcUser 값으로 오고 있다. 이것을 래핑해야한다.
@@ -33,14 +37,18 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("authentication: {}", authentication.getPrincipal());
+        Member member = null;
         if (authentication.getPrincipal() instanceof DefaultOidcUser oidcUser) {
             Optional<Member> opMember = memberService.findMemberByEmail(oidcUser.getEmail());
             if (opMember.isPresent()) {
-                updateMember(oidcUser, opMember.get());
+                member = updateMember(oidcUser, opMember.get());
             } else {
-                registerMember(oidcUser);
+                member = registerMember(oidcUser);
             }
         }
+        assert member != null;
+        String jwt = jwtProvider.createJwt(member.getUuid());
+        CookieUtils.addCookie(response, JwtFilter.JWT_COOKIE_NAME, jwt, jwtProvider.getExpiredTime());
         response.sendRedirect("/");
     }
 
@@ -48,12 +56,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
      * 최초 회원가입
      * @param oidcUser
      */
-    private void registerMember(DefaultOidcUser oidcUser) {
+    private Member registerMember(DefaultOidcUser oidcUser) {
         Member member = Member.builder()
                 .email(oidcUser.getEmail())
                 .username(oidcUser.getFullName())
                 .build();
-        memberService.createMember(member);
+        return memberService.createMember(member);
     }
 
     /**
@@ -61,8 +69,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
      * @param oidcUser
      * @param member
      */
-    private void updateMember(DefaultOidcUser oidcUser, Member member) {
+    private Member updateMember(DefaultOidcUser oidcUser, Member member) {
         member.update(oidcUser);
-        memberService.createMember(member);
+        return memberService.createMember(member);
     }
 }

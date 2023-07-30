@@ -31,5 +31,14 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     generate-ddl: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  session:
+    redis:
+      repository-type: default
+
 server:
   port: 8180
