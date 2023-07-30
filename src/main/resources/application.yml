@@ -1,0 +1,35 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          local_oidc:
+            issuer-uri: http://iinow.synology.me:11080/realms/local-oidc
+        registration:
+          local_oidc:
+            client-id: dev-oidc-client
+            client-secret: dbEZgL1pqmQ7coA8g06NHbANZyaEWRsg
+            scope:
+              - openid
+              - email
+            provider: local_oidc
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+
+server:
+  port: 8180

@@ -1,0 +1,18 @@
+<!DOCTYPE>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+</head>
+<body>
+<div>로그인된 사용자만이 접근 가능합니다.</div>
+<section>
+    현재 로그인된 사용자 정보: <span th:text="${data}"/>
+</section>
+<button id="btnLogout">로그아웃</button>
+<script>
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        location.href = '/logout'
+    })
+</script>
+</body>
+</html>

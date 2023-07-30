@@ -1,0 +1,15 @@
+<!DOCTYPE>
+<html lang="ko">
+<head>
+
+</head>
+<body>
+<div>로그인 페이지</div>
+<button id="btnLoginOidc">local-oidc login</button>
+<script>
+    document.getElementById('btnLoginOidc').addEventListener('click', () => {
+        location.href = '/oauth2/authorization/local_oidc'
+    })
+</script>
+</body>
+</html>
